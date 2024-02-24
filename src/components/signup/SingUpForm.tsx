@@ -47,7 +47,7 @@ const SignUpForm = () => {
   return (
     <div className="signup-container">
       <div className="signup-wrapper" onSubmit={signUpHandler}>
-        <h2>회원가입</h2>
+        <h2>회원 가입</h2>
         <form id="signup-form">
           <Input
             title={'이메일'}
