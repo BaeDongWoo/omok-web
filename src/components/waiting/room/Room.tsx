@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { RoomListProps } from './RoomList';
 export interface Roomtype {
   title: string;
+  checked: boolean;
+  pwd: string;
   roomId: number;
 }
 interface RoomProps {

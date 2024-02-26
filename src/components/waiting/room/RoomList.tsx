@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import Room, { Roomtype } from './Room';
-import { Link } from 'react-router-dom';
 export interface RoomListProps {
   roomList: Roomtype[];
 }
@@ -17,6 +16,7 @@ const Container = styled.div`
   width: 100%;
   height: 600px;
   display: flex;
+  overflow: scroll;
   flex-direction: column;
   align-items: center;
   padding-top: 50px;

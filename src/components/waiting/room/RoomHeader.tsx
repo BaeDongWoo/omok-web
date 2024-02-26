@@ -1,23 +1,28 @@
-import { Dispatch, useRef } from 'react';
+import { Dispatch, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { RoomListProps } from './RoomList';
 import { Roomtype } from './Room';
-interface RoomHeaderprops extends RoomListProps {
+import Modal from '../../common/Modal';
+export interface RoomHeaderprops extends RoomListProps {
   setRoomList: Dispatch<React.SetStateAction<Roomtype[]>>;
 }
+
 const RoomHeader = ({ roomList, setRoomList }: RoomHeaderprops) => {
-  const addRoomList = () => {
-    const roomInfo = {
-      title: '타이틀' + roomList.length,
-      roomId: roomList.length + 1,
-    };
-    roomList.push(roomInfo);
-    setRoomList([...roomList]);
+  const [isModal, setIsModal] = useState<boolean>(false);
+  const openModal = () => {
+    setIsModal(!isModal);
   };
   return (
     <Container>
       <div>방목록</div>
-      <button onClick={addRoomList}>방만들기</button>
+      <button onClick={openModal}>방만들기</button>
+      {isModal && (
+        <Modal
+          setIsModal={setIsModal}
+          roomList={roomList}
+          setRoomList={setRoomList}
+        />
+      )}
     </Container>
   );
 };
