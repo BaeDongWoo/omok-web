@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import './Background.scss';
 const BackGround = () => {
   return (
     <Container>

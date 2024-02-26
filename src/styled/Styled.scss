@@ -75,3 +75,48 @@ $shadows-big: multiple-box-shadow(100);
     transform: translateY(-100vh);
   }
 }
+
+.hr {
+  width: 100%;
+  height: 1px;
+  display: block;
+  position: relative;
+  margin-bottom: 0em;
+  padding: 10px 0;
+  &:after,
+  &:before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: 50%;
+    left: 0;
+  }
+  &:after {
+    transition: opacity 0.3s ease, animation 0.3s ease;
+    background: linear-gradient(
+      to right,
+      #62efab 5%,
+      #f2ea7d 15%,
+      #f2ea7d 25%,
+      #ff8797 35%,
+      #ff8797 45%,
+      #e1a4f4 55%,
+      #e1a4f4 65%,
+      #82fff4 75%,
+      #82fff4 85%,
+      #62efab 95%
+    );
+    background-size: 200%;
+    background-position: 0%;
+    animation: bar 15s linear infinite;
+  }
+  @keyframes bar {
+    0% {
+      background-position: 0%;
+    }
+    100% {
+      background-position: 200%;
+    }
+  }
+}
