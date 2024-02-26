@@ -1,11 +1,15 @@
+import { signInAnonymously } from 'firebase/auth';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { auth } from '../../config/firebaseConfig';
 const NicknameInput = () => {
   const nav = useNavigate();
   const [nickname, setNickname] = useState<string>('');
-  const enterHandler = () => {
-    sessionStorage.setItem('nickname', nickname);
+  const enterHandler = async () => {
+    const user = await signInAnonymously(auth);
+    localStorage.setItem('nickname', nickname);
+    localStorage.setItem('uid', user.user.uid);
     nav('/waiting');
   };
   return (
