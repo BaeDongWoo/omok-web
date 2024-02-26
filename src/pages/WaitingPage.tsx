@@ -7,13 +7,12 @@ import { Roomtype } from '../components/waiting/room/Room';
 
 const WaitingPage = () => {
   const [roomList, setRoomList] = useState<Roomtype[]>((): any => {
-    const list = sessionStorage.getItem('roomList') || '';
+    const list = localStorage.getItem('roomList') || '';
     return list ? JSON.parse(list) : [];
   });
 
   useEffect(() => {
-    sessionStorage.setItem('roomList', JSON.stringify(roomList));
-    console.log('asdas');
+    localStorage.setItem('roomList', JSON.stringify(roomList));
   }, [roomList]);
   return (
     <Container>
