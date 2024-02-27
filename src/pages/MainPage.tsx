@@ -1,5 +1,6 @@
 import {
   DocumentData,
+  deleteDoc,
   doc,
   getDoc,
   onSnapshot,
@@ -8,7 +9,6 @@ import {
 import { useEffect } from 'react';
 import { fireStore } from '../config/firebaseConfig';
 import { useParams } from 'react-router-dom';
-import { Roomtype } from '../components/waiting/room/Room';
 
 const MainPage = () => {
   const { roomId } = useParams();
@@ -22,7 +22,7 @@ const MainPage = () => {
           );
           let users = data.data().users;
           users.push(uid);
-          updateDoc(doc(fireStore, 'rooms', roomId), { users: users });
+          await updateDoc(doc(fireStore, 'rooms', roomId), { users: users });
         };
         getData();
         const unsubscribe = onSnapshot(
@@ -36,7 +36,13 @@ const MainPage = () => {
             );
             let users = data.data().users;
             users = users.filter((user: string) => user !== uid);
-            updateDoc(doc(fireStore, 'rooms', roomId), { users: users });
+            if (users.length === 0) {
+              await deleteDoc(doc(fireStore, 'rooms', roomId));
+            } else {
+              await updateDoc(doc(fireStore, 'rooms', roomId), {
+                users: users,
+              });
+            }
           };
           getData();
           unsubscribe();
