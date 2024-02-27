@@ -2,7 +2,8 @@ import { Dispatch, useState } from 'react';
 import styled from 'styled-components';
 import { RoomHeaderprops } from '../waiting/room/RoomHeader';
 import { useNavigate } from 'react-router-dom';
-import { userInfo } from 'os';
+import { fireStore } from '../../config/firebaseConfig';
+import { collection, doc, getDocs, query, setDoc } from 'firebase/firestore';
 
 interface ModalProps extends RoomHeaderprops {
   setIsModal: Dispatch<React.SetStateAction<boolean>>;
@@ -12,18 +13,23 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
   const [isChecked, setIsChecked] = useState(false);
   const [pwd, setPwd] = useState('');
   const [title, setTitle] = useState('');
-  const addList = () => {
+  const addRoom = async () => {
+    const roomId = new Date().getTime();
     const roomInfo = {
-      title: title,
+      roomTitle: title,
       checked: isChecked,
       pwd: pwd,
-      roomId: new Date().getTime(),
+      roomId: roomId,
+      users: [],
     };
-    roomList.push(roomInfo);
-    setRoomList([...roomList]);
-    localStorage.setItem('roomList', JSON.stringify(roomList));
-    setIsModal(false);
-    nav(`/room/${roomInfo.roomId}`);
+    try {
+      const q = doc(fireStore, 'rooms', roomId.toString());
+      await setDoc(q, roomInfo);
+      setIsModal(false);
+      nav(`/room/${roomInfo.roomId}`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const closeModal = () => {
@@ -58,7 +64,7 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
         <button id="close" onClick={closeModal}>
           닫기
         </button>
-        <button id="make" onClick={addList}>
+        <button id="make" onClick={addRoom}>
           만들기
         </button>
       </BtnBox>
@@ -69,7 +75,7 @@ const Container = styled.div`
   width: 500px;
   height: 300px;
   background-color: #e8f0fe;
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   display: flex;
