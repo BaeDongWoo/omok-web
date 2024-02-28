@@ -10,7 +10,7 @@ const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stones, setStones] = useState<Cell[]>([]);
   const boardSize = 19;
-  const cellSize = 20;
+  const cellSize = 30;
   const cavasSize = boardSize * cellSize;
 
   useEffect(() => {
@@ -40,10 +40,32 @@ const Board = () => {
     const canvas = canvasRef.current;
     let index = canvas?.getBoundingClientRect();
     if (index) {
-      const [x, y] = [e.clientX - index.left, e.clientY - index.top];
+      const { x, y } = {
+        x: Math.round((e.clientX - index.left) / 30) * 30,
+        y: Math.round((e.clientY - index.top) / 30) * 30,
+      };
       console.log(x, y);
+      markStone({ x, y });
+      return { x, y };
     }
   };
+  const markStone = ({ x, y }: Cell) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 0.8;
+      drawBoard(ctx);
+      ctx.beginPath();
+      ctx.strokeStyle = '#00aaaa';
+      ctx.fillStyle = '#000';
+      ctx.arc(x, y, 10, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  };
+
   return (
     <Container>
       <BoardGrid
