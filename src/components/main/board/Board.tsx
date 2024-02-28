@@ -18,13 +18,13 @@ const Board = () => {
     const ctx = canvas?.getContext('2d');
     if (ctx) {
       drawBoard(ctx);
-      console.log(stones);
     }
   }, [stones]);
 
   const drawBoard = (ctx: CanvasRenderingContext2D) => {
     ctx.strokeStyle = '#00aaaa';
     ctx.lineWidth = 1;
+    ctx.clearRect(0, 0, cavasSize, cavasSize);
     for (let i = 1; i <= boardSize; i++) {
       ctx.beginPath(); // 새로운 선을 그리기 시작
       const startCell = i * cellSize;
@@ -34,9 +34,24 @@ const Board = () => {
       ctx.lineTo(startCell, cavasSize);
       ctx.stroke();
     }
+    drawStone(ctx);
     ctx.closePath();
   };
-  const onMouseMove = (e: any) => {
+  const drawStone = (ctx: CanvasRenderingContext2D) => {
+    ctx.strokeStyle = '#00aaaa';
+    ctx.fillStyle = '#000';
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < stones.length; i++) {
+      const X = stones[i].x;
+      const Y = stones[i].y;
+      ctx.beginPath();
+      ctx.arc(X, Y, 10, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      ctx.closePath();
+    }
+  };
+  const onMouseMoveStone = (e: any) => {
     const canvas = canvasRef.current;
     let index = canvas?.getBoundingClientRect();
     if (index) {
@@ -44,7 +59,6 @@ const Board = () => {
         x: Math.round((e.clientX - index.left) / 30) * 30,
         y: Math.round((e.clientY - index.top) / 30) * 30,
       };
-      console.log(x, y);
       markStone({ x, y });
       return { x, y };
     }
@@ -53,8 +67,6 @@ const Board = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (ctx && canvas) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.globalAlpha = 0.8;
       drawBoard(ctx);
       ctx.beginPath();
       ctx.strokeStyle = '#00aaaa';
@@ -65,7 +77,17 @@ const Board = () => {
       ctx.globalAlpha = 1;
     }
   };
-
+  const onClickStone = (e: any) => {
+    const canvas = canvasRef.current;
+    let index = canvas?.getBoundingClientRect();
+    if (index) {
+      const { x, y } = {
+        x: Math.round((e.clientX - index.left) / 30) * 30,
+        y: Math.round((e.clientY - index.top) / 30) * 30,
+      };
+      setStones([...stones, { x, y }]);
+    }
+  };
   return (
     <Container>
       <BoardGrid
@@ -73,7 +95,8 @@ const Board = () => {
         width={cavasSize}
         height={cavasSize}
         style={{ border: '3px solid #00aaaa' }}
-        onMouseMove={onMouseMove}
+        onMouseMove={onMouseMoveStone}
+        onClick={onClickStone}
       />
     </Container>
   );
