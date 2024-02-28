@@ -6,13 +6,14 @@ import {
   onSnapshot,
   updateDoc,
 } from 'firebase/firestore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { fireStore } from '../config/firebaseConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 import Board from '../components/main/board/Board';
 
 const MainPage = () => {
   const nav = useNavigate();
+  const [roomUsersCnt, setRoomUserCnt] = useState<number>(0);
   const { roomId } = useParams();
   const uid = localStorage.getItem('uid');
   useEffect(() => {
@@ -26,12 +27,18 @@ const MainPage = () => {
           let users = data.data().users;
           users.push(uid);
           users = Array.from(new Set(users));
+
           await updateDoc(doc(fireStore, 'rooms', roomId), { users: users });
         };
         const startSnapshot = () => {
           unsubscribe = onSnapshot(
             doc(fireStore, 'rooms', roomId),
-            (snapshot) => {}
+            (snapshot) => {
+              const data = snapshot?.data();
+              if (data) {
+                setRoomUserCnt(data.users.length);
+              }
+            }
           );
         };
         const snapshot = async () => {
@@ -68,7 +75,7 @@ const MainPage = () => {
   return (
     <>
       <button onClick={() => nav('/waiting')}>벋흔</button>
-      <Board />
+      <Board userCnt={roomUsersCnt} />
     </>
   );
 };
