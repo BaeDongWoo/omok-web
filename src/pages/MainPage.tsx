@@ -10,10 +10,16 @@ import { useEffect, useState } from 'react';
 import { fireStore } from '../config/firebaseConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 import Board from '../components/main/board/Board';
-
+export interface roomCheck {
+  userCnt: number;
+  stoneNum: number;
+}
 const MainPage = () => {
   const nav = useNavigate();
-  const [roomUsersCnt, setRoomUserCnt] = useState<number>(0);
+  const [roomUsersCnt, setRoomUserCnt] = useState<roomCheck>({
+    userCnt: 0,
+    stoneNum: 0,
+  });
   const { roomId } = useParams();
   const uid = localStorage.getItem('uid');
   useEffect(() => {
@@ -27,7 +33,6 @@ const MainPage = () => {
           let users = data.data().users;
           users.push(uid);
           users = Array.from(new Set(users));
-
           await updateDoc(doc(fireStore, 'rooms', roomId), { users: users });
         };
         const startSnapshot = () => {
@@ -36,7 +41,13 @@ const MainPage = () => {
             (snapshot) => {
               const data = snapshot?.data();
               if (data) {
-                setRoomUserCnt(data.users.length);
+                const stoneNum = data.users.findIndex(
+                  (id: string) => id === uid
+                );
+                setRoomUserCnt({
+                  userCnt: data.users.length,
+                  stoneNum: stoneNum,
+                });
               }
             }
           );
@@ -75,7 +86,7 @@ const MainPage = () => {
   return (
     <>
       <button onClick={() => nav('/waiting')}>벋흔</button>
-      <Board userCnt={roomUsersCnt} />
+      <Board userProps={roomUsersCnt} />
     </>
   );
 };

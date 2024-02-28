@@ -1,19 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { roomCheck } from '../../../pages/MainPage';
 
 interface Cell {
   color: number;
   x: number;
   y: number;
 }
-
-const Board = () => {
+interface boardProps {
+  userProps: roomCheck;
+}
+const Board = ({ userProps }: boardProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stones, setStones] = useState<Cell[]>([]);
   const [turn, setTurn] = useState(0);
   const boardSize = 19;
   const cellSize = 30;
   const canvasSize = boardSize * cellSize;
+  console.log(userProps);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,7 +41,6 @@ const Board = () => {
       ctx.lineTo(startCell, canvasSize);
       ctx.stroke();
     }
-    // console.log(stones);
     drawStone(ctx);
     ctx.closePath();
   };
@@ -48,7 +51,7 @@ const Board = () => {
       const X = stones[i].x;
       const Y = stones[i].y;
       const color = stones[i].color;
-      ctx.fillStyle = color ? '#000' : '#fff';
+      ctx.fillStyle = userProps.stoneNum ? '#fff' : '#000';
       ctx.beginPath();
       ctx.arc(X, Y, 10, 0, 2 * Math.PI);
       ctx.fill();
@@ -64,8 +67,9 @@ const Board = () => {
         x: Math.round((e.clientX - index.left) / 30) * 30,
         y: Math.round((e.clientY - index.top) / 30) * 30,
       };
-      if (x > 0 && x < canvasSize && y > 0 && y < canvasSize)
+      if (x > 0 && x < canvasSize && y > 0 && y < canvasSize) {
         canvas.style.cursor = 'pointer';
+      }
       const color = turn;
       markStone({ color, x, y });
       return { x, y };
@@ -80,7 +84,7 @@ const Board = () => {
       ctx.globalAlpha = 0.5;
       ctx.beginPath();
       ctx.strokeStyle = '#00aaaa';
-      ctx.fillStyle = color ? '#000' : '#fff';
+      ctx.fillStyle = userProps.stoneNum ? '#fff' : '#000';
       ctx.arc(x, y, 10, 0, 2 * Math.PI);
       ctx.fill();
       ctx.stroke();
@@ -95,7 +99,6 @@ const Board = () => {
         y: Math.round((e.clientY - index.top) / 30) * 30,
       };
       const color = turn;
-      console.log(stones);
       let flag = true;
       stones.map((stone) => {
         if (stone.x === x && stone.y === y) flag = false;
@@ -108,6 +111,7 @@ const Board = () => {
       } else alert('해당 위치에는 돌을 놓을 수 없습니다.');
     }
   };
+  const updateBoard = async () => {};
   const changeTurn = () => {
     if (turn === 0) setTurn(1);
     else if (turn === 1) setTurn(0);
@@ -119,8 +123,8 @@ const Board = () => {
         width={canvasSize}
         height={canvasSize}
         style={{ border: '3px solid #00aaaa' }}
-        onMouseMove={onMouseMoveStone}
-        onClick={onClickStone}
+        onMouseMove={userProps.userCnt === 2 ? onMouseMoveStone : undefined}
+        onClick={userProps.userCnt === 2 ? onClickStone : undefined}
       />
     </Container>
   );
