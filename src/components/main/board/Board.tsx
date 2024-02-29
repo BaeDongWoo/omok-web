@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { roomCheck } from '../../../pages/MainPage';
+
 import {
   DocumentData,
   doc,
@@ -12,22 +12,21 @@ import { fireStore } from '../../../config/firebaseConfig';
 import { useParams } from 'react-router-dom';
 
 interface Cell {
-  color: number;
+  color: number | undefined;
   x: number;
   y: number;
 }
-interface boardProps {
-  userProps: roomCheck;
-}
-const Board = ({ userProps }: boardProps) => {
+const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stones, setStones] = useState<Cell[]>([]);
-  const [turn, setTurn] = useState(0);
+  const [turn, setTurn] = useState<number>();
+  const [startGame, setStartGame] = useState<boolean>();
+  const [myStone, setMyStone] = useState<number>();
   const boardSize = 19;
   const cellSize = 30;
   const canvasSize = boardSize * cellSize;
   const { roomId } = useParams();
-
+  const uid = localStorage.getItem('uid');
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -50,7 +49,9 @@ const Board = ({ userProps }: boardProps) => {
       ctx.lineTo(startCell, canvasSize);
       ctx.stroke();
     }
-    drawStone(ctx);
+    if (stones) {
+      drawStone(ctx);
+    }
     ctx.closePath();
   };
   const drawStone = (ctx: CanvasRenderingContext2D) => {
@@ -79,7 +80,7 @@ const Board = ({ userProps }: boardProps) => {
       if (x > 0 && x < canvasSize && y > 0 && y < canvasSize) {
         canvas.style.cursor = 'pointer';
       }
-      const color = userProps.stoneNum;
+      const color = myStone;
       markStone({ color, x, y });
       return { x, y };
     }
@@ -115,7 +116,6 @@ const Board = ({ userProps }: boardProps) => {
       if (x === 0 || x === canvasSize) flag = false;
       if (y === 0 || y === canvasSize) flag = false;
       if (flag) {
-        changeTurn();
         const tempStone = [...stones, { color, x, y }];
         updateBoard(tempStone);
       } else alert('해당 위치에는 돌을 놓을 수 없습니다.');
@@ -123,7 +123,11 @@ const Board = ({ userProps }: boardProps) => {
   };
   const updateBoard = async (tempStone: Cell[]) => {
     if (roomId) {
-      await updateDoc(doc(fireStore, 'rooms', roomId), { board: tempStone });
+      const nextTurn = changeTurn();
+      await updateDoc(doc(fireStore, 'rooms', roomId), {
+        board: tempStone,
+        game: { startGame: true, turn: nextTurn },
+      });
     }
   };
   useEffect(() => {
@@ -134,6 +138,11 @@ const Board = ({ userProps }: boardProps) => {
           const data = snapShot?.data();
           if (data) {
             setStones(data.board);
+            setTurn(data.game.turn);
+            setStones(data.board);
+            setStartGame(data.game.startGame);
+            const stone = data.users.findIndex((user: string) => user === uid);
+            setMyStone(stone);
           }
         }
       );
@@ -143,8 +152,8 @@ const Board = ({ userProps }: boardProps) => {
     }
   }, []);
   const changeTurn = () => {
-    if (turn === 0) setTurn(1);
-    else if (turn === 1) setTurn(0);
+    if (turn === 0) return 1;
+    else if (turn === 1) return 0;
   };
   return (
     <Container>
@@ -153,8 +162,10 @@ const Board = ({ userProps }: boardProps) => {
         width={canvasSize}
         height={canvasSize}
         style={{ border: '3px solid #00aaaa' }}
-        onMouseMove={userProps.userCnt === 2 ? onMouseMoveStone : undefined}
-        onClick={userProps.userCnt === 2 ? onClickStone : undefined}
+        onMouseMove={
+          startGame && myStone === turn ? onMouseMoveStone : undefined
+        }
+        onClick={startGame && myStone === turn ? onClickStone : undefined}
       />
     </Container>
   );
