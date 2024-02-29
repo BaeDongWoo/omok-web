@@ -15,21 +15,21 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
   const [title, setTitle] = useState('');
   const addRoom = async () => {
     const roomId = new Date().getTime();
-    const uid = localStorage.getItem('uid');
     const roomInfo = {
       roomTitle: title,
       checked: isChecked,
       pwd: pwd,
       roomId: roomId,
-      users: [uid],
+      users: [],
       game: { startGame: false, turn: 0 },
       board: [],
+      nickname: [],
     };
     try {
       const q = doc(fireStore, 'rooms', roomId.toString());
       await setDoc(q, roomInfo);
       setIsModal(false);
-      nav(`/room/${roomInfo.roomId}`);
+      nav(`/room/${roomInfo.roomId}/${roomInfo.roomTitle}`);
     } catch (e) {
       console.error(e);
     }
