@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { RoomHeaderprops } from '../waiting/room/RoomHeader';
 import { useNavigate } from 'react-router-dom';
 import { fireStore } from '../../config/firebaseConfig';
-import { collection, doc, getDocs, query, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface ModalProps extends RoomHeaderprops {
   setIsModal: Dispatch<React.SetStateAction<boolean>>;
@@ -15,12 +15,15 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
   const [title, setTitle] = useState('');
   const addRoom = async () => {
     const roomId = new Date().getTime();
+    const uid = localStorage.getItem('uid');
     const roomInfo = {
       roomTitle: title,
       checked: isChecked,
       pwd: pwd,
       roomId: roomId,
-      users: [],
+      users: [uid],
+      game: { startGame: false, turn: 0 },
+      board: [],
     };
     try {
       const q = doc(fireStore, 'rooms', roomId.toString());
