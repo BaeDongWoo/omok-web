@@ -17,8 +17,9 @@ const MainPage = () => {
   const uid = localStorage.getItem('uid');
   const nickname = localStorage.getItem('nickname');
   const { roomId, roomTitle } = useParams();
-
   const [me, setMe] = useState(nickname);
+  const [meReady, setMeReady] = useState(false);
+  const [userReady, setUserReady] = useState(false);
   const [user, setUser] = useState('user');
   const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
@@ -87,6 +88,7 @@ const MainPage = () => {
                 users: users,
                 nickname: nick,
                 game: { startGame: false, turn: 0 },
+                ready: [false, false],
               });
             }
             unsubscribe();
@@ -98,15 +100,36 @@ const MainPage = () => {
       console.error(e);
     }
   }, []);
+  const onClickMeReady = async () => {
+    if (roomId) {
+      const data = await getDoc(doc(fireStore, 'rooms', roomId));
+      const roomData = data.data();
+      if (roomData) {
+        const index = roomData.users.findIndex((user: string) => user === uid);
+        let ready = roomData.ready;
+        if (ready[index] === false) {
+          ready[index] = true;
+          await updateDoc(doc(fireStore, 'rooms', roomId), {
+            ready: ready,
+          });
+        } else {
+          ready[index] = false;
+          await updateDoc(doc(fireStore, 'rooms', roomId), {
+            ready: ready,
+          });
+        }
+      }
+    }
+  };
   return (
     <>
       <TitleBox>{roomTitle}</TitleBox>
       <GameBox>
         <div>{user}</div>
-        {onReady && <button>ready</button>}
+        {/* {onReady && <button onClick={onClickUserReady}>ready</button>} */}
         <Board />
         <div>{me}</div>
-        {onReady && <button>ready</button>}
+        {onReady && <button onClick={onClickMeReady}>ready</button>}
       </GameBox>
     </>
   );
