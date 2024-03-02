@@ -17,9 +17,10 @@ const MainPage = () => {
   const uid = localStorage.getItem('uid');
   const nickname = localStorage.getItem('nickname');
   const { roomId, roomTitle } = useParams();
+
   const [me, setMe] = useState(nickname);
   const [user, setUser] = useState('user');
-
+  const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
     try {
       if (roomId) {
@@ -52,6 +53,7 @@ const MainPage = () => {
                 const getNick = data.nickname.filter(
                   (nick: string) => nick !== nickname
                 );
+                setOnReady(data.game.startGame);
                 if (getNick.length === 0) {
                   setUser('user');
                 } else {
@@ -101,8 +103,10 @@ const MainPage = () => {
       <TitleBox>{roomTitle}</TitleBox>
       <GameBox>
         <div>{user}</div>
+        {onReady && <button>ready</button>}
         <Board />
         <div>{me}</div>
+        {onReady && <button>ready</button>}
       </GameBox>
     </>
   );
