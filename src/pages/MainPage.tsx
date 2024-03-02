@@ -18,9 +18,8 @@ const MainPage = () => {
   const nickname = localStorage.getItem('nickname');
   const { roomId, roomTitle } = useParams();
   const [me, setMe] = useState(nickname);
-  const [meReady, setMeReady] = useState(false);
-  const [userReady, setUserReady] = useState(false);
   const [user, setUser] = useState('user');
+  const [start, setStart] = useState<boolean>(false);
   const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
     try {
@@ -41,8 +40,9 @@ const MainPage = () => {
           });
           if (users.length === 2) {
             await updateDoc(doc(fireStore, 'rooms', roomId), {
-              game: { startGame: true, turn: 0 },
+              game: { startGame: false, turn: 0 },
             });
+            setOnReady(true);
           }
         };
         const startSnapshot = async () => {
@@ -54,7 +54,10 @@ const MainPage = () => {
                 const getNick = data.nickname.filter(
                   (nick: string) => nick !== nickname
                 );
-                setOnReady(data.game.startGame);
+                if (data.ready[0] === true && data.ready[1] === true) {
+                  setStart(true);
+                  console.log(start);
+                }
                 if (getNick.length === 0) {
                   setUser('user');
                 } else {
@@ -127,7 +130,7 @@ const MainPage = () => {
       <GameBox>
         <div>{user}</div>
         {/* {onReady && <button onClick={onClickUserReady}>ready</button>} */}
-        <Board />
+        <Board start={start} />
         <div>{me}</div>
         {onReady && <button onClick={onClickMeReady}>ready</button>}
       </GameBox>

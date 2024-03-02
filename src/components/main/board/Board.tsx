@@ -16,11 +16,13 @@ interface Cell {
   x: number;
   y: number;
 }
-const Board = () => {
+interface BoardProps {
+  start: boolean;
+}
+const Board = ({ start }: BoardProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stones, setStones] = useState<Cell[]>([]);
   const [turn, setTurn] = useState<number>();
-  const [startGame, setStartGame] = useState<boolean>();
   const [myStone, setMyStone] = useState<number>();
   const boardSize = 19;
   const cellSize = 30;
@@ -140,7 +142,6 @@ const Board = () => {
             setStones(data.board);
             setTurn(data.game.turn);
             setStones(data.board);
-            setStartGame(data.game.startGame);
             const stone = data.users.findIndex((user: string) => user === uid);
             setMyStone(stone);
           }
@@ -162,10 +163,8 @@ const Board = () => {
         width={canvasSize}
         height={canvasSize}
         style={{ border: '3px solid #00aaaa' }}
-        onMouseMove={
-          startGame && myStone === turn ? onMouseMoveStone : undefined
-        }
-        onClick={startGame && myStone === turn ? onClickStone : undefined}
+        onMouseMove={start && myStone === turn ? onMouseMoveStone : undefined}
+        onClick={start && myStone === turn ? onClickStone : undefined}
       />
     </Container>
   );
