@@ -11,6 +11,7 @@ import { fireStore } from '../config/firebaseConfig';
 import { useNavigate, useParams } from 'react-router-dom';
 import Board from '../components/main/board/Board';
 import styled from 'styled-components';
+import UserProfile from '../components/main/userprofile/UserProfile';
 
 const MainPage = () => {
   const nav = useNavigate();
@@ -18,7 +19,9 @@ const MainPage = () => {
   const nickname = localStorage.getItem('nickname');
   const { roomId, roomTitle } = useParams();
   const [me, setMe] = useState(nickname);
+  const [meState, setMeState] = useState<boolean>(false);
   const [user, setUser] = useState('user');
+  const [userState, setUserState] = useState<boolean>(false);
   const [start, setStart] = useState<boolean>(false);
   const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
@@ -51,12 +54,22 @@ const MainPage = () => {
             (snapshot) => {
               const data = snapshot?.data();
               if (data) {
+                const index = data.users.findIndex(
+                  (user: string) => user === uid
+                );
+                let userIndex;
+                if (index === 1) userIndex = 0;
+                else userIndex = 1;
+                setMeState(data.ready[index]);
+
+                setUserState(data.ready[userIndex]);
                 const getNick = data.nickname.filter(
                   (nick: string) => nick !== nickname
                 );
                 if (data.ready[0] === true && data.ready[1] === true) {
                   setStart(true);
-                  console.log(start);
+                } else {
+                  setStart(false);
                 }
                 if (getNick.length === 0) {
                   setUser('user');
@@ -92,6 +105,7 @@ const MainPage = () => {
                 nickname: nick,
                 game: { startGame: false, turn: 0 },
                 ready: [false, false],
+                board: [],
               });
             }
             unsubscribe();
@@ -103,7 +117,7 @@ const MainPage = () => {
       console.error(e);
     }
   }, []);
-  const onClickMeReady = async () => {
+  const onClickReady = async () => {
     if (roomId) {
       const data = await getDoc(doc(fireStore, 'rooms', roomId));
       const roomData = data.data();
@@ -128,11 +142,17 @@ const MainPage = () => {
     <>
       <TitleBox>{roomTitle}</TitleBox>
       <GameBox>
-        <div>{user}</div>
-        {/* {onReady && <button onClick={onClickUserReady}>ready</button>} */}
+        <UserProfile
+          onClickReady={onClickReady}
+          nickname={user}
+          state={userState}
+        />
         <Board start={start} />
-        <div>{me}</div>
-        {onReady && <button onClick={onClickMeReady}>ready</button>}
+        <UserProfile
+          onClickReady={onClickReady}
+          nickname={me}
+          state={meState}
+        />
       </GameBox>
     </>
   );
