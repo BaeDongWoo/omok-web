@@ -1,7 +1,7 @@
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-const UserProfile = ({ onClickReady, nickname, state }: any) => {
+const UserProfile = ({ onClickReady, nickname, state, start }: any) => {
   const nick = localStorage.getItem('nickname');
-
   return (
     <Container>
       <div className="nickname">{nickname}</div>
@@ -9,7 +9,7 @@ const UserProfile = ({ onClickReady, nickname, state }: any) => {
       <ReadyBtn
         onClick={onClickReady}
         state={state}
-        disabled={nick === nickname ? false : true}
+        disabled={nick !== nickname || start ? true : false}
       >
         {state ? 'GO' : 'READY'}
       </ReadyBtn>
@@ -19,7 +19,7 @@ const UserProfile = ({ onClickReady, nickname, state }: any) => {
 const Container = styled.div`
   width: 500px;
   height: 50%;
-  border: 1px solid black;
+  //   border: 1px solid black;
   display: flex;
   flex-direction: column;
   align-items: center;
