@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import UserProfile from '../components/main/userprofile/UserProfile';
 
 const MainPage = () => {
-  const nav = useNavigate();
   const uid = localStorage.getItem('uid');
   const nickname = localStorage.getItem('nickname');
   const { roomId, roomTitle } = useParams();
@@ -23,7 +22,29 @@ const MainPage = () => {
   const [user, setUser] = useState('user');
   const [userState, setUserState] = useState<boolean>(false);
   const [start, setStart] = useState<boolean>(false);
+  const [count, setCount] = useState<number>(5);
+  const [isCount, setIsCount] = useState<boolean>(false);
+
   const [onReady, setOnReady] = useState<boolean>(false);
+  useEffect(() => {
+    if (count > 0) {
+      const intervalId = setInterval(() => {
+        setCount((count) => count - 1);
+      }, 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [count]);
+  useEffect(() => {
+    if (isCount) {
+      const startTimeout = setTimeout(() => {
+        setStart(true);
+      }, 5000);
+      return () => clearTimeout(startTimeout);
+    } else setStart(false);
+  }, [isCount]);
+  const countDown = (time: number) => {
+    setCount(time);
+  };
   useEffect(() => {
     try {
       if (roomId) {
@@ -54,6 +75,7 @@ const MainPage = () => {
             (snapshot) => {
               const data = snapshot?.data();
               if (data) {
+                if (data.allReady === true) alert('gkdl');
                 const index = data.users.findIndex(
                   (user: string) => user === uid
                 );
@@ -61,15 +83,16 @@ const MainPage = () => {
                 if (index === 1) userIndex = 0;
                 else userIndex = 1;
                 setMeState(data.ready[index]);
-
                 setUserState(data.ready[userIndex]);
                 const getNick = data.nickname.filter(
                   (nick: string) => nick !== nickname
                 );
                 if (data.ready[0] === true && data.ready[1] === true) {
-                  setStart(true);
+                  setIsCount(true);
+                  countDown(5);
                 } else {
-                  setStart(false);
+                  setIsCount(false);
+                  countDown(0);
                 }
                 if (getNick.length === 0) {
                   setUser('user');
@@ -97,8 +120,6 @@ const MainPage = () => {
             nick = nick.filter((ni: string) => ni !== nickname);
             if (users.length === 0) {
               await deleteDoc(doc(fireStore, 'rooms', roomId));
-              // 뒤로가기시 랜더링 될때 해당 방이 나왔다가 사라짐
-              // 후에 redux를 통해 roomList를 업데이트처리 예정
             } else {
               await updateDoc(doc(fireStore, 'rooms', roomId), {
                 users: users,
@@ -141,17 +162,22 @@ const MainPage = () => {
   return (
     <>
       <TitleBox>{roomTitle}</TitleBox>
+      <TitleBox>
+        {isCount ? `${count}초뒤 게임이 시작됩니다!` : '준비를 완료해 주세요'}
+      </TitleBox>
       <GameBox>
         <UserProfile
           onClickReady={onClickReady}
           nickname={user}
           state={userState}
+          start={start}
         />
         <Board start={start} />
         <UserProfile
           onClickReady={onClickReady}
           nickname={me}
           state={meState}
+          start={start}
         />
       </GameBox>
     </>
@@ -160,8 +186,8 @@ const MainPage = () => {
 const TitleBox = styled.h1`
   color: #e8f0fe;
   text-align: center;
-  margin-top: 100px;
-  margin-bottom: 50px;
+  margin-top: 50px;
+  // margin-bottom: 50px;
 `;
 const GameBox = styled.div`
   display: flex;
