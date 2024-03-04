@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { fireStore } from '../../../config/firebaseConfig';
 import { useParams } from 'react-router-dom';
+import { checkOmok } from './validateOmok';
 
 interface Cell {
   color: number | undefined;
@@ -29,6 +30,10 @@ const Board = ({ start }: BoardProps) => {
   const canvasSize = boardSize * cellSize;
   const { roomId } = useParams();
   const uid = localStorage.getItem('uid');
+  let tempBoard = new Array(19);
+  for (let i = 0; i < tempBoard.length; i++) {
+    tempBoard[i] = new Array(19);
+  }
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
@@ -65,7 +70,7 @@ const Board = ({ start }: BoardProps) => {
       const color = stones[i].color;
       ctx.fillStyle = color ? '#fff' : '#000';
       ctx.beginPath();
-      ctx.arc(X, Y, 10, 0, 2 * Math.PI);
+      ctx.arc(X * 30, Y * 30, 10, 0, 2 * Math.PI);
       ctx.fill();
       ctx.stroke();
       ctx.closePath();
@@ -107,8 +112,8 @@ const Board = ({ start }: BoardProps) => {
     let index = canvas?.getBoundingClientRect();
     if (index) {
       const { x, y } = {
-        x: Math.round((e.clientX - index.left) / 30) * 30,
-        y: Math.round((e.clientY - index.top) / 30) * 30,
+        x: (Math.round((e.clientX - index.left) / 30) * 30) / 30,
+        y: (Math.round((e.clientY - index.top) / 30) * 30) / 30,
       };
       const color = turn;
       let flag = true;
@@ -119,10 +124,20 @@ const Board = ({ start }: BoardProps) => {
       if (y === 0 || y === canvasSize) flag = false;
       if (flag) {
         const tempStone = [...stones, { color, x, y }];
-        updateBoard(tempStone);
+        tempStone.map((stone) => {
+          tempBoard[stone.x][stone.y] = stone.color;
+        });
+        const check = checkOmok(x, y, color, tempBoard);
+        console.log(check);
+        if (check) {
+          alert('오목입니다');
+        } else {
+          updateBoard(tempStone);
+        }
       } else alert('해당 위치에는 돌을 놓을 수 없습니다.');
     }
   };
+
   const updateBoard = async (tempStone: Cell[]) => {
     if (roomId) {
       const nextTurn = changeTurn();
@@ -141,9 +156,12 @@ const Board = ({ start }: BoardProps) => {
           if (data) {
             setStones(data.board);
             setTurn(data.game.turn);
-            setStones(data.board);
             const stone = data.users.findIndex((user: string) => user === uid);
             setMyStone(stone);
+            // data.board.map((stone: any) => {
+            //   tempBoard[stone.x][stone.y] = stone.color;
+            // });
+            // console.log(tempBoard);
           }
         }
       );
