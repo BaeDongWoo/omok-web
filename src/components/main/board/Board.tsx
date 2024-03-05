@@ -25,6 +25,7 @@ const Board = ({ start }: BoardProps) => {
   const [stones, setStones] = useState<Cell[]>([]);
   const [turn, setTurn] = useState<number>();
   const [myStone, setMyStone] = useState<number>();
+  const [reset, setReset] = useState<boolean>(false);
   const boardSize = 19;
   const cellSize = 30;
   const canvasSize = boardSize * cellSize;
@@ -128,16 +129,23 @@ const Board = ({ start }: BoardProps) => {
           tempBoard[stone.x][stone.y] = stone.color;
         });
         const check = checkOmok(x, y, color, tempBoard);
-        console.log(check);
         if (check) {
-          alert('오목입니다');
+          updateBoard(tempStone);
+          endGame();
         } else {
           updateBoard(tempStone);
         }
       } else alert('해당 위치에는 돌을 놓을 수 없습니다.');
     }
   };
-
+  const endGame = async () => {
+    if (roomId) {
+      await updateDoc(doc(fireStore, 'rooms', roomId), {
+        end: true,
+        winner: localStorage.getItem('nickname'),
+      });
+    }
+  };
   const updateBoard = async (tempStone: Cell[]) => {
     if (roomId) {
       const nextTurn = changeTurn();
@@ -145,6 +153,20 @@ const Board = ({ start }: BoardProps) => {
         board: tempStone,
         game: { startGame: true, turn: nextTurn },
       });
+    }
+  };
+  const resetGame = async () => {
+    if (roomId) {
+      const data = (await getDoc(doc(fireStore, 'rooms', roomId))).data();
+      if (data) {
+        alert(`게임이 종료되었습니다. 승자는 ${data.winner}님 입니다.`);
+        await updateDoc(doc(fireStore, 'rooms', roomId), {
+          ready: [false, false],
+          end: false,
+          game: { startGame: false, turn: 0 },
+          board: [],
+        });
+      }
     }
   };
   useEffect(() => {
@@ -158,10 +180,9 @@ const Board = ({ start }: BoardProps) => {
             setTurn(data.game.turn);
             const stone = data.users.findIndex((user: string) => user === uid);
             setMyStone(stone);
-            // data.board.map((stone: any) => {
-            //   tempBoard[stone.x][stone.y] = stone.color;
-            // });
-            // console.log(tempBoard);
+            if (data.end) {
+              resetGame();
+            }
           }
         }
       );
