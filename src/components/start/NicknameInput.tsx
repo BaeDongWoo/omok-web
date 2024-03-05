@@ -7,6 +7,7 @@ const NicknameInput = () => {
   const nav = useNavigate();
   const [nickname, setNickname] = useState<string>('');
   const enterHandler = async () => {
+    if (nickname.trim() === '') return alert('공백은 입력하실 수 없습니다.');
     const user = await signInAnonymously(auth);
     localStorage.setItem('nickname', nickname);
     localStorage.setItem('uid', user.user.uid);

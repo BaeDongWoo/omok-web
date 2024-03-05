@@ -14,6 +14,7 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
   const [pwd, setPwd] = useState('');
   const [title, setTitle] = useState('');
   const addRoom = async () => {
+    if (title.trim() === '') return alert('공백은 입력하실 수 없습니다.');
     const roomId = new Date().getTime();
     const roomInfo = {
       roomTitle: title,

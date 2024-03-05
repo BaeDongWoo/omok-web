@@ -17,6 +17,9 @@ const Container = styled.div`
   height: 600px;
   display: flex;
   overflow: scroll;
+  &::-webkit-scrollbar {
+    display: none;
+  }
   flex-direction: column;
   align-items: center;
   padding-top: 50px;

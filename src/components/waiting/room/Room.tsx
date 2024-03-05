@@ -14,7 +14,7 @@ const Room = ({ room }: RoomProps) => {
   const nav = useNavigate();
   const enterRoomHandler = () => {
     if (room.users < 2) {
-      nav(`/room/${room.roomId}`);
+      nav(`/room/${room.roomId}/${room.title}`);
     } else {
       alert('방에 입장할 수 없습니다.');
     }

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Greeting = () => {
-  const nickname = sessionStorage.getItem('nickname');
+  const nickname = localStorage.getItem('nickname');
   return (
     <Container>
       <h1>환영합니다 {nickname}님!!</h1>

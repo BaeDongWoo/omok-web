@@ -6,39 +6,47 @@ import { useEffect, useState } from 'react';
 import { Roomtype } from '../components/waiting/room/Room';
 import { fireStore } from '../config/firebaseConfig';
 import { collection, onSnapshot } from 'firebase/firestore';
+import Spinner from '../components/common/Spinner';
 
 const WaitingPage = () => {
   const [roomList, setRoomList] = useState<Roomtype[]>([]);
-
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(fireStore, 'rooms'),
-      (snapshot) => {
-        const updatedRooms: Roomtype[] = [];
-        snapshot.forEach((room) => {
-          const roomInfo = {
-            title: room.data().roomTitle,
-            roomId: room.data().roomId,
-            checked: room.data().checked,
-            pwd: room.data().pwd,
-            users: room.data().users.length,
-          };
-          updatedRooms.push(roomInfo);
-        });
-        setRoomList(updatedRooms);
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
+    try {
+      const unsubscribe = onSnapshot(
+        collection(fireStore, 'rooms'),
+        (snapshot) => {
+          const updatedRooms: Roomtype[] = [];
+          snapshot.forEach((room) => {
+            if (room.data().users.length !== 0) {
+              const roomInfo = {
+                title: room.data().roomTitle,
+                roomId: room.data().roomId,
+                checked: room.data().checked,
+                pwd: room.data().pwd,
+                users: room.data().users.length,
+              };
+              updatedRooms.push(roomInfo);
+            }
+          });
+          setRoomList(updatedRooms);
+          setLoading(false);
+        }
+      );
+      return () => {
+        unsubscribe();
+      };
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
   }, []);
   return (
     <Container>
       <Greeting />
       <RoomHeader roomList={roomList} setRoomList={setRoomList} />
       <b className="hr"></b>
-      <RoomList roomList={roomList} />
+      {loading ? <Spinner></Spinner> : <RoomList roomList={roomList} />}
     </Container>
   );
 };
@@ -48,4 +56,5 @@ const Container = styled.div`
   margin: auto;
   padding: 100px;
 `;
+
 export default WaitingPage;
