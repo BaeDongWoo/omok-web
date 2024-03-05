@@ -3,9 +3,9 @@ import NicknameInput from '../components/start/NicknameInput';
 import { useEffect } from 'react';
 import { auth } from '../config/firebaseConfig';
 
-const LoginPage = () => {
+const StartPage = () => {
   useEffect(() => {
-    // auth.signOut();
+    auth.signOut();
   }, []);
   return (
     <Container>
@@ -19,4 +19,4 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
 `;
-export default LoginPage;
+export default StartPage;
