@@ -25,6 +25,7 @@ const Modal = ({ setIsModal, roomList, setRoomList }: ModalProps) => {
       board: [],
       nickname: [],
       ready: [false, false],
+      end: false,
     };
     try {
       const q = doc(fireStore, 'rooms', roomId.toString());
