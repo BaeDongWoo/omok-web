@@ -16,15 +16,16 @@ import UserProfile from '../components/main/userprofile/UserProfile';
 const MainPage = () => {
   const uid = localStorage.getItem('uid');
   const nickname = localStorage.getItem('nickname');
+  const nav = useNavigate();
   const { roomId, roomTitle } = useParams();
   const [me, setMe] = useState(nickname);
-  const [meState, setMeState] = useState<boolean>(false);
+  const [myState, setMyState] = useState<boolean>(false);
   const [user, setUser] = useState('user');
   const [userState, setUserState] = useState<boolean>(false);
   const [start, setStart] = useState<boolean>(false);
   const [count, setCount] = useState<number>(5);
   const [isCount, setIsCount] = useState<boolean>(false);
-
+  const [turn, setTurn] = useState<string>('');
   const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
     if (count > 0) {
@@ -58,6 +59,7 @@ const MainPage = () => {
           users = Array.from(new Set(users));
           let nick = data.data().nickname;
           nick.push(nickname);
+          nick = Array.from(new Set(nick));
           await updateDoc(doc(fireStore, 'rooms', roomId), {
             users: users,
             nickname: nick,
@@ -75,15 +77,15 @@ const MainPage = () => {
             (snapshot) => {
               const data = snapshot?.data();
               if (data) {
-                if (data.allReady === true) alert('gkdl');
                 const index = data.users.findIndex(
                   (user: string) => user === uid
                 );
                 let userIndex;
                 if (index === 1) userIndex = 0;
                 else userIndex = 1;
-                setMeState(data.ready[index]);
+                setMyState(data.ready[index]);
                 setUserState(data.ready[userIndex]);
+                setTurn(data.nickname[data.game.turn]);
                 const getNick = data.nickname.filter(
                   (nick: string) => nick !== nickname
                 );
@@ -160,11 +162,15 @@ const MainPage = () => {
     }
   };
   return (
-    <>
+    <Container>
       <TitleBox>{roomTitle}</TitleBox>
-      <TitleBox>
-        {isCount ? `${count}초뒤 게임이 시작됩니다!` : '준비를 완료해 주세요'}
-      </TitleBox>
+      {start ? (
+        <TitleBox>{turn}님 차례입니다</TitleBox>
+      ) : (
+        <TitleBox>
+          {isCount ? `${count}초뒤 게임이 시작됩니다!` : '준비를 완료해 주세요'}
+        </TitleBox>
+      )}
       <GameBox>
         <UserProfile
           onClickReady={onClickReady}
@@ -172,25 +178,53 @@ const MainPage = () => {
           state={userState}
           start={start}
         />
-        <Board start={start} />
+        <BoardBox>
+          <Board start={start} />
+          <ExitBtn onClick={() => nav('/waiting')}>나가기</ExitBtn>
+        </BoardBox>
         <UserProfile
           onClickReady={onClickReady}
           nickname={me}
-          state={meState}
+          state={myState}
           start={start}
         />
       </GameBox>
-    </>
+    </Container>
   );
 };
+const Container = styled.div`
+  width: 100vw;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
 const TitleBox = styled.h1`
   color: #e8f0fe;
   text-align: center;
   margin-top: 50px;
   // margin-bottom: 50px;
 `;
+const BoardBox = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
 const GameBox = styled.div`
   display: flex;
   color: #e8f0fe;
+`;
+const ExitBtn = styled.button`
+  width: 100px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  color: #fff;
+  background-color: #00aaaa;
+  height: 50px;
+  border-radius: 10px;
+  &:hover {
+    background-color: #019696;
+  }
 `;
 export default MainPage;
