@@ -3,7 +3,7 @@ export const checkOmok = (x, y, stone, board) => {
   const b = checkTB(x, y, stone, board); //세로
   const c = checkRD(x, y, stone, board); //오른쪽 대각선
   const d = checkLD(x, y, stone, board); //왼쪽 대각선
-  if (a == true || b == true || c == true || d == true) {
+  if (a === true || b === true || c === true || d === true) {
     // 4방향 중 하나의 방향이라도 true라면 true를 리턴
     return true;
   } else {
@@ -20,7 +20,6 @@ const checkLR = (x, y, stone, board) => {
     nx += 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -36,7 +35,6 @@ const checkLR = (x, y, stone, board) => {
     nx -= 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -46,7 +44,7 @@ const checkLR = (x, y, stone, board) => {
       break;
     }
   }
-  if (cnt == 4) {
+  if (cnt === 4) {
     //돌을 놓은 곳을 기준으로 총 4개의 같은 돌이 있으면 true를 리턴
     return true;
   } else {
@@ -62,7 +60,6 @@ const checkTB = (x, y, stone, board) => {
     ny += 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -77,7 +74,6 @@ const checkTB = (x, y, stone, board) => {
     ny -= 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -87,7 +83,7 @@ const checkTB = (x, y, stone, board) => {
       break;
     }
   }
-  if (cnt == 4) {
+  if (cnt === 4) {
     return true;
   } else {
     return false;
@@ -103,7 +99,6 @@ const checkRD = (x, y, stone, board) => {
     ny += 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -120,7 +115,6 @@ const checkRD = (x, y, stone, board) => {
     ny -= 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -130,7 +124,7 @@ const checkRD = (x, y, stone, board) => {
       break;
     }
   }
-  if (cnt == 4) {
+  if (cnt === 4) {
     return true;
   } else {
     return false;
@@ -146,7 +140,6 @@ const checkLD = (x, y, stone, board) => {
     ny -= 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -163,7 +156,6 @@ const checkLD = (x, y, stone, board) => {
     ny += 1;
     if (nx >= 0 && nx < size && ny >= 0 && ny < size) {
       let s = board[nx][ny];
-      console.log(s);
       if (stone === s) {
         cnt++;
       } else {
@@ -173,7 +165,7 @@ const checkLD = (x, y, stone, board) => {
       break;
     }
   }
-  if (cnt == 4) {
+  if (cnt === 4) {
     return true;
   } else {
     return false;
