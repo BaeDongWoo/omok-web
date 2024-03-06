@@ -26,7 +26,6 @@ const MainPage = () => {
   const [count, setCount] = useState<number>(5);
   const [isCount, setIsCount] = useState<boolean>(false);
   const [turn, setTurn] = useState<string>('');
-  const [onReady, setOnReady] = useState<boolean>(false);
   useEffect(() => {
     if (count > 0) {
       const intervalId = setInterval(() => {
@@ -65,10 +64,11 @@ const MainPage = () => {
             nickname: nick,
           });
           if (users.length === 2) {
-            await updateDoc(doc(fireStore, 'rooms', roomId), {
-              game: { startGame: false, turn: 0 },
-            });
-            setOnReady(true);
+            if (data.data().game.startGame === false) {
+              await updateDoc(doc(fireStore, 'rooms', roomId), {
+                game: { startGame: false, turn: 0 },
+              });
+            }
           }
         };
         const startSnapshot = async () => {
@@ -90,8 +90,12 @@ const MainPage = () => {
                   (nick: string) => nick !== nickname
                 );
                 if (data.ready[0] === true && data.ready[1] === true) {
-                  setIsCount(true);
-                  countDown(5);
+                  if (data.game.startGame === false) {
+                    setIsCount(true);
+                    countDown(5);
+                  } else {
+                    setStart(true);
+                  }
                 } else {
                   setIsCount(false);
                   countDown(0);
@@ -122,7 +126,7 @@ const MainPage = () => {
             nick = nick.filter((ni: string) => ni !== nickname);
             if (users.length === 0) {
               await deleteDoc(doc(fireStore, 'rooms', roomId));
-            } else {
+            } else if (users.length === 1) {
               await updateDoc(doc(fireStore, 'rooms', roomId), {
                 users: users,
                 nickname: nick,
