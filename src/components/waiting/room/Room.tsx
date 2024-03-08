@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { css } from 'styled-components';
+import InputPassword from './InputPassword';
 export interface Roomtype {
   title: string;
   checked: boolean;
@@ -12,26 +14,42 @@ interface RoomProps {
 }
 const Room = ({ room }: RoomProps) => {
   const nav = useNavigate();
+  const [isPassword, setIsPassword] = useState(false);
   const enterRoomHandler = () => {
     if (room.users < 2) {
-      nav(`/room/${room.roomId}/${room.title}`);
+      if (room.checked) {
+        setIsPassword(!isPassword);
+      } else nav(`/room/${room.roomId}/${room.title}`);
     } else {
       alert('방에 입장할 수 없습니다.');
     }
   };
   return (
-    <Container
-      onClick={room.users < 2 ? enterRoomHandler : undefined}
-      disabled={room.users >= 2 ? true : false}
-    >
-      <div className="room-title">
-        <h2>{room.title}</h2>
-      </div>
-      <div className="room-state">
-        <h3>{room.users < 2 ? '대기중...' : '게임중...'}</h3>
-        <h2>{room.users}/2</h2>
-      </div>
-    </Container>
+    <>
+      <Container
+        onClick={room.users < 2 ? enterRoomHandler : undefined}
+        disabled={room.users >= 2 ? true : false}
+      >
+        <div className="room-title">
+          <h2>{room.title}</h2>
+        </div>
+        <div className="room-state">
+          {room.checked ? <img src="Password.png"></img> : ''}
+          <h3>{room.users < 2 ? '대기중...' : '게임중...'}</h3>
+          <h2>{room.users}/2</h2>
+        </div>
+      </Container>
+      {isPassword ? (
+        <InputPassword
+          setIsPassword={setIsPassword}
+          roomId={room.roomId}
+          title={room.title}
+          pwd={room.pwd}
+        />
+      ) : (
+        ''
+      )}
+    </>
   );
 };
 const Container = styled.div<{ disabled: boolean }>`
@@ -65,6 +83,10 @@ const Container = styled.div<{ disabled: boolean }>`
   .room-state {
     display: flex;
     align-items: center;
+    img {
+      width: 30px;
+      height: 30px;
+    }
     h3 {
       margin-top: 7px;
       margin-right: 10px;
