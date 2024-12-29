@@ -14,8 +14,8 @@ import styled from 'styled-components';
 import UserProfile from '../components/main/userprofile/UserProfile';
 
 const MainPage = () => {
-  const uid = localStorage.getItem('uid');
-  const nickname = localStorage.getItem('nickname');
+  const uid = sessionStorage.getItem('uid');
+  const nickname = sessionStorage.getItem('nickname');
   const nav = useNavigate();
   const { roomId, roomTitle } = useParams();
   const [me, setMe] = useState(nickname);
@@ -34,6 +34,7 @@ const MainPage = () => {
       return () => clearInterval(intervalId);
     }
   }, [count]);
+
   useEffect(() => {
     if (isCount) {
       const startTimeout = setTimeout(() => {
@@ -53,6 +54,14 @@ const MainPage = () => {
           const data: DocumentData = await getDoc(
             doc(fireStore, 'rooms', roomId)
           );
+          if (!data.data()) {
+            alert('해당 방이 존재하지 않습니다.');
+            return nav('/waiting');
+          }
+          if (data.data().users.length === 2) {
+            alert('방이 가득 찼습니다.');
+            return nav('/waiting');
+          }
           let users = data.data().users;
           users.push(uid);
           users = Array.from(new Set(users));
@@ -120,20 +129,22 @@ const MainPage = () => {
             const data: DocumentData = await getDoc(
               doc(fireStore, 'rooms', roomId)
             );
-            let users = data.data().users;
-            users = users.filter((user: string) => user !== uid);
-            let nick = data.data().nickname;
-            nick = nick.filter((ni: string) => ni !== nickname);
-            if (users.length === 0) {
-              await deleteDoc(doc(fireStore, 'rooms', roomId));
-            } else if (users.length === 1) {
-              await updateDoc(doc(fireStore, 'rooms', roomId), {
-                users: users,
-                nickname: nick,
-                game: { startGame: false, turn: 0 },
-                ready: [false, false],
-                board: [],
-              });
+            if (data.data()) {
+              let users = data.data().users;
+              users = users.filter((user: string) => user !== uid);
+              let nick = data.data().nickname;
+              nick = nick.filter((ni: string) => ni !== nickname);
+              if (users.length === 0) {
+                await deleteDoc(doc(fireStore, 'rooms', roomId));
+              } else if (users.length === 1) {
+                await updateDoc(doc(fireStore, 'rooms', roomId), {
+                  users: users,
+                  nickname: nick,
+                  game: { startGame: false, turn: 0 },
+                  ready: [false, false],
+                  board: [],
+                });
+              }
             }
             unsubscribe();
           };
@@ -144,6 +155,42 @@ const MainPage = () => {
       console.error(e);
     }
   }, []);
+
+  useEffect(() => {
+    if (roomId) {
+      let unsubscribe: any;
+
+      const removeData = async (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        const data: DocumentData = await getDoc(
+          doc(fireStore, 'rooms', roomId)
+        );
+        let users = data.data().users;
+        console.log(users);
+        users = users.filter((user: string) => user !== uid);
+        let nick = data.data().nickname;
+        nick = nick.filter((ni: string) => ni !== nickname);
+        if (users.length === 0) {
+          await deleteDoc(doc(fireStore, 'rooms', roomId));
+        } else if (users.length === 1) {
+          await updateDoc(doc(fireStore, 'rooms', roomId), {
+            users: users,
+            nickname: nick,
+            game: { startGame: false, turn: 0 },
+            ready: [false, false],
+            board: [],
+          });
+        }
+        unsubscribe();
+      };
+
+      window.addEventListener('beforeunload', removeData);
+      return () => {
+        window.removeEventListener('beforeunload', removeData);
+      };
+    }
+  }, []);
+
   const onClickReady = async () => {
     if (roomId) {
       const data = await getDoc(doc(fireStore, 'rooms', roomId));

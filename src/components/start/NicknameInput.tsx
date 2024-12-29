@@ -8,9 +8,10 @@ const NicknameInput = () => {
   const [nickname, setNickname] = useState<string>('');
   const enterHandler = async () => {
     if (nickname.trim() === '') return alert('공백은 입력하실 수 없습니다.');
+    await auth.signOut(); // 항상 새로운 uid를 발급 받기 위해 먼저 인스턴스 로그아웃을 진행
     const user = await signInAnonymously(auth);
-    localStorage.setItem('nickname', nickname);
-    localStorage.setItem('uid', user.user.uid);
+    sessionStorage.setItem('nickname', nickname);
+    sessionStorage.setItem('uid', user.user.uid);
     nav('/waiting');
   };
   return (

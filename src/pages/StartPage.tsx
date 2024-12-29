@@ -5,7 +5,7 @@ import { auth } from '../config/firebaseConfig';
 
 const StartPage = () => {
   useEffect(() => {
-    auth.signOut();
+    // auth.signOut();
   }, []);
   return (
     <Container>

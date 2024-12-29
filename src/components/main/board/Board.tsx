@@ -30,7 +30,7 @@ const Board = ({ start }: BoardProps) => {
   const cellSize = 30;
   const canvasSize = boardSize * cellSize;
   const { roomId } = useParams();
-  const uid = localStorage.getItem('uid');
+  const uid = sessionStorage.getItem('uid');
   let tempBoard = new Array(19);
   for (let i = 0; i < tempBoard.length; i++) {
     tempBoard[i] = new Array(19);
@@ -142,7 +142,7 @@ const Board = ({ start }: BoardProps) => {
     if (roomId) {
       await updateDoc(doc(fireStore, 'rooms', roomId), {
         end: true,
-        winner: localStorage.getItem('nickname'),
+        winner: sessionStorage.getItem('nickname'),
       });
     }
   };

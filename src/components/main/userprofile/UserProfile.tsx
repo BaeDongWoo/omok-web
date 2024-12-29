@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 const UserProfile = ({ onClickReady, nickname, state, start }: any) => {
-  const nick = localStorage.getItem('nickname');
+  const nick = sessionStorage.getItem('nickname');
   return (
     <Container>
       <div className="nickname">{nickname}</div>
